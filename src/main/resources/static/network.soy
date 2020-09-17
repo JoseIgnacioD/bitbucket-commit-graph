@@ -1,0 +1,148 @@
+{namespace bitbucket.plugin}
+
+/**
+ * @param repository Repository
+ * @param commitPage Page<Commit>
+ * @param labels ArrayList<String>
+ * @param page <Integer>
+ * @param limit <Integer>
+ */
+{template .network}
+{webResourceManager_requireResourcesForContext('bitbucket.plugin.network')}
+<html>
+<head>
+    <meta name="decorator" content="bitbucket.repository.general">
+    <meta name="projectKey" content="{$repository.project.key}">
+    <meta name="repositorySlug" content="{$repository.slug}">
+    <meta name="activeTab" content="network-plugin-tab">
+    <title>{$repository.slug} / Network</title>
+</head>
+<body>
+    <h2 class="page-panel-content-header">Network</h2>
+    <table class="commit-graph-table">
+        <tbody>
+            <td class="commit-graph">
+                <div class="header-fill">&nbsp;</div>
+                <div class="graph-body"></div>
+            </td>
+            <td class="commits">
+                <table class="aui commits-table">
+                    <thead>
+                        <th class="author">Author</th>
+                        <th class="commit">Commit</th>
+                        <th class="message">Message</th>
+                        <th class="comment-count"></th>
+                        <th class="timestamp">Commit Date</th>
+                    </thead>
+                    <tbody class="infinitescroll">
+                        {call .network_fragment}
+                            {param repository: $repository /}
+                            {param commitPage: $commitPage /}
+                            {param labels: $labels /}
+                            {param page: $page /}
+                            {param limit: $limit /}
+                        {/call}
+                    </tbody>
+                </table>
+            </td>
+        </tbody>
+    </table>
+    <div class="commitgraph-loading-indicator">
+        <div class="spinner">
+    </div>
+</body>
+</html>
+{/template}
+
+/**
+ * @param repository Repository
+ * @param commitPage Page<Commit>
+ * @param labels ArrayList<String>
+ * @param page <Integer>
+ * @param limit <Integer>
+ */
+{template .network_fragment}
+    {foreach $commit in $commitPage.values}
+        <tr data-commitid="{$commit.id}" class="commit-row {if length($commit.parents) >= 2}merge{/if}">
+            <td class="author">
+				{call bitbucket.internal.widget.avatar.avatar.avatarWithName}
+					{param size: 'small' /}
+					{param person: $commit.author /}
+					{param link: true /}
+					{param linkExtraClasses: 'secondary-link' /}
+				{/call}
+            </td>
+            <td class="commit">
+				{call bitbucket.internal.feature.commit.commitLink.commitLink.link}
+					{param repository: $repository /}
+					{param commit: $commit /}
+					{param triggerMode: 'hover-accessible' /}
+				{/call}
+
+				<!-- show merge lozenge/icon if is a merge commit, eg has 2+ parents -->
+				{if length($commit.parents) >= 2}
+					{call bitbucket.internal.widget.lozenge.lozenge.merge}
+						{param abbreviated: true /}
+					{/call}
+				{/if}
+            </td>
+            <td class="message"><span>{$commit.message|truncate:500|escapeHtml}</span></td>
+            <td class="comment-count">
+				{if $commit.properties and $commit.properties.commentCount}
+					{call bitbucket.internal.feature.commentCount.commentCount.commentCount}
+						{param count: $commit.properties.commentCount /}
+					{/call}
+				{/if}
+            </td>
+            <td class="timestamp">
+                {if $commit.authorTimestamp}
+                    <time title="{format_date($commit.authorTimestamp, 'full')}" datetime="{format_date($commit.authorTimestamp, 'timestamp')}">
+                        {format_date($commit.authorTimestamp, 'shortAge')}
+                    </time>
+                {else}
+                    <time>Unknown</time>
+                {/if}
+            </td>
+        </tr>
+    {/foreach}
+    {if $commitPage.size > 0}
+        <tr class="infinitescroll-nav">
+            <td colspan="5" class="nav-links">
+                {if $page > 1}
+                    <a class="scroll-nav scroll-prev" href="?page={$page - 1}">&larr; Prev</a>
+                {/if}
+                {if $commitPage.size >= $limit}
+                    <a class="scroll-nav scroll-next" href="?page={$page + 1}">Next &rarr;</a>
+                {/if}
+                <commitgraph-javascript style="display: none">
+                    [
+                        {foreach $commit in $commitPage.values}
+                            {lb}
+                                "id": "{$commit.id}",
+                                "href": "{nav_commit($repository.project, $repository, $commit.id)}",
+                                {if $labels[$commit.id]}
+                                    "labels": [
+                                        {foreach $label in $labels[$commit.id]}
+                                            {lb}
+                                                "name": "{$label.displayId}",
+                                                "type": "{$label.type}",
+                                                "href": "{nav_repo_browse($repository.project.key, $repository.slug)}?at={$label.displayId}"
+                                            {rb}
+                                            {if isLast($label) == false},{/if}
+                                        {/foreach}
+                                    ],
+                                {/if}
+                                "parents": [
+                                    {foreach $parentCommit in $commit.parents}
+                                        {lb} "id": "{$parentCommit.id}" {rb}
+                                        {if isLast($parentCommit) == false},{/if}
+                                    {/foreach}
+                                ]
+                            {rb}{if isLast($commit) == false},{/if}
+                        {/foreach}
+                    ]
+                </commitgraph-javascript>
+            </td>
+        </tr>
+    {/if}
+{/template}

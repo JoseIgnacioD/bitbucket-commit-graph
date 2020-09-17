@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="com.fgv.bitbucket.bitbucket-commit-graph" name="${project.name}" plugins-version="2"> 
+  <plugin-info> 
+    <description>${project.description}</description>  
+    <version>${project.version}</version>  
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>  
+    <param name="plugin-icon">static/img/pluginIcon.png</param>  
+    <param name="plugin-logo">static/img/pluginLogo.png</param>  
+    <param name="atlassian-data-center-compatible">true</param> 
+  </plugin-info>
+  <resource type="i18n" name="i18n" location="commitgraph"/>
+  <component-import key="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer" />
+  <component-import key="linkEnricher" interface="com.atlassian.bitbucket.rest.enrich.LinkEnricher" />
+  <component-import key="avatarEnricher" interface="com.atlassian.bitbucket.rest.enrich.AvatarEnricher" />
+  <component-import key="loginUriProvider" interface="com.atlassian.sal.api.auth.LoginUriProvider" />
+  <component-import key="webResourceManager" interface="com.atlassian.plugin.webresource.WebResourceManager" />
+  <component-import key="gitScm" interface="com.atlassian.bitbucket.scm.git.GitScm" />
+  <web-resource key="raphael" name="Raphael">
+    <resource type="download" name="raphael.js" location="/static/js/raphael/raphael.js" />
+  </web-resource>
+  <web-resource key="graph-segment" name="Graph Segment">
+    <resource type="download" name="commit-collection.js" location="/static/graph-segment/commit-collection.js" />
+    <resource type="download" name="graph-segment.js" location="/static/graph-segment/graph-segment.js" />
+    <dependency>com.fgv.bitbucket.bitbucket-commit-graph:raphael</dependency>
+  </web-resource>
+  <web-resource key="legacy-mode-resources" name="Legacy Mode Resources">
+    <transformation extension="less">
+      <transformer key="less-transformer" />
+    </transformation>
+    <resource type="download" name="infinitescroll.js" location="/static/legacy/lib/jquery.infinitescroll.js" />
+    <resource type="download" name="network.js" location="/static/legacy/network.js" />
+    <resource type="download" name="network.css" location="/static/legacy/network.less" />
+    <dependency>com.fgv.bitbucket.bitbucket-commit-graph:graph-segment</dependency>
+  </web-resource>
+  <web-resource key="tab-resources" name="tab-resources"> 
+    <resource type="download" name="icons.css" location="/static/css/icons.css" />
+    <resource type="download" name="icon-commit-graph.svg" location="/static/img/icon-commit-graph.svg"> 
+      <param name="content-type" value="image/svg+xml"/> 
+    </resource>  
+    <context>bitbucket.layout.repository</context> 
+  </web-resource>
+  <web-item name="Repository navigation tab" key="network-plugin-tab" section="bitbucket.repository.nav" weight="30"> 
+    <label>Network</label>  
+    <!--    <condition class="com.atlassian.bitbucket.web.conditions.RepositoryNotEmptyCondition"/>  -->  
+    <param name="iconClass">aui-icon icon-commit-graph</param>  
+    <link>/plugins/servlet/network/${repository.project.key}/${repository.slug}</link> 
+  </web-item>  
+  <servlet name="Network Servlet" i18n-name-key="network-servlet.name" key="networkservlet" class="networkservlet.NetworkServlet"> 
+    <description key="network-servlet.description">The Network Servlet Plugin</description>  
+    <url-pattern>/network/*</url-pattern> 
+  </servlet>  
+  <client-resource key="network-soy-templates" name="Network Soy Templates">
+    <directory location="/static/">
+      <include>/**/*.soy</include>
+    </directory>
+    <dependency>com.atlassian.bitbucket.server.bitbucket-web:server-soy-templates</dependency>
+  </client-resource>
+</atlassian-plugin>

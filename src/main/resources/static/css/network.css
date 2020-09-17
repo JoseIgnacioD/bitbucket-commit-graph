@@ -1,0 +1,16 @@
+.commit-graph-error {
+    text-align: center;
+    margin: 75px 16px;
+}
+.commit-graph-error p {
+    font-size: 16px;
+    color: #666;
+    margin-top: 0.5em;
+}
+.commit-graph-error h2 {
+    margin-top: 1.3em;
+    font-weight: normal;    
+}
+
+
+

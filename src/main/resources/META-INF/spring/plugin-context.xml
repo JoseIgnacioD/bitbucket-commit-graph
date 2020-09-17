@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:atlassian-scanner="http://www.atlassian.com/schema/atlassian-scanner"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/osgi
+		http://www.springframework.org/schema/osgi/spring-osgi.xsd
+        http://www.atlassian.com/schema/atlassian-scanner
+        http://www.atlassian.com/schema/atlassian-scanner/atlassian-scanner.xsd">
+			<osgi:reference id="repositoryService" interface="com.atlassian.bitbucket.repository.RepositoryService" />
+			<osgi:reference id="commitEnricher" interface="com.atlassian.bitbucket.commit.CommitEnricher" />
+			<osgi:reference id="soyTemplateRenderer" interface="com.atlassian.soy.renderer.SoyTemplateRenderer" />
+			<osgi:reference id="webResourceManager" interface="com.atlassian.plugin.webresource.WebResourceManager" />
+			<osgi:reference id="gitScm" interface="com.atlassian.bitbucket.scm.git.GitScm" />
+    <atlassian-scanner:scan-indexes/>
+</beans>
